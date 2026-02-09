@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 	"real-time-forum/database"
+	"real-time-forum/handlers"
 	"real-time-forum/websocket"
 )
 
@@ -34,6 +35,11 @@ func main() {
 	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		websocket.ServeWs(hub, w, r)
 	})
+
+	// Auth Endpoints
+	http.HandleFunc("/api/register", handlers.RegisterHandler)
+	http.HandleFunc("/api/login", handlers.LoginHandler)
+	http.HandleFunc("/api/logout", handlers.LogoutHandler)
 
 	log.Printf("Server starting on http://localhost:%s", port)
 	err = http.ListenAndServe(":"+port, nil)
