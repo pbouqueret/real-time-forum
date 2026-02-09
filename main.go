@@ -40,6 +40,7 @@ func main() {
 	http.HandleFunc("/api/register", handlers.RegisterHandler)
 	http.HandleFunc("/api/login", handlers.LoginHandler)
 	http.HandleFunc("/api/logout", handlers.LogoutHandler)
+	http.HandleFunc("/api/me", handlers.MeHandler)
 
 	log.Printf("Server starting on http://localhost:%s", port)
 	err = http.ListenAndServe(":"+port, nil)
