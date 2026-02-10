@@ -12,3 +12,9 @@ type Comment struct {
 	Content   string    `json:"content"`
 	CreatedAt time.Time `json:"created_at"`
 }
+
+// CommentWithAuthor includes the author's username for display
+type CommentWithAuthor struct {
+	Comment
+	Author string `json:"author"`
+}
