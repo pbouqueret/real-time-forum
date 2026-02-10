@@ -32,3 +32,6 @@ go.work.sum
 # .vscode/
 forum.db
 cookies.txt
+
+# Project docs (local only)
+*.docx
