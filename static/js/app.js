@@ -56,6 +56,7 @@ export function updateNavbar() {
         nav.innerHTML = `
             <a href="#/" class="nav-brand">Real-Time Forum</a>
             <div class="nav-right">
+                <a href="#/chat" class="nav-link">Chat</a>
                 <span class="nav-user">${state.currentUser.username}</span>
                 <button id="logoutBtn" class="btn-logout">Logout</button>
             </div>
