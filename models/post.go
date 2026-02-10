@@ -13,3 +13,9 @@ type Post struct {
 	Content   string    `json:"content"`
 	CreatedAt time.Time `json:"created_at"`
 }
+
+// PostWithAuthor includes the author's username for display
+type PostWithAuthor struct {
+	Post
+	Author string `json:"author"`
+}
