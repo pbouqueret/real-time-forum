@@ -16,7 +16,8 @@ export async function handleRoute() {
     updateNavbar();
 
     // Route guard: redirect to login if not authenticated and route is protected
-    if (!state.isAuthenticated && !publicRoutes.includes(path)) {
+    const isPublic = publicRoutes.includes(path) || publicRoutes.some(r => path.startsWith(r));
+    if (!state.isAuthenticated && !isPublic) {
         window.location.hash = '#/login';
         return;
     }
@@ -29,11 +30,14 @@ export async function handleRoute() {
 
     // Route to the correct page
     if (path === '/') {
-        import('../pages/home.js').then(module => module.render(app));
+        import('../pages/feed.js').then(module => module.render(app));
     } else if (path === '/login') {
         import('../pages/login.js').then(module => module.render(app));
     } else if (path === '/register') {
         import('../pages/register.js').then(module => module.render(app));
+    } else if (path.startsWith('/post/')) {
+        const postId = path.split('/')[2];
+        import('../pages/post.js').then(module => module.render(app, postId));
     } else {
         app.innerHTML = '<div class="container"><h2>404 - Page Not Found</h2></div>';
     }
