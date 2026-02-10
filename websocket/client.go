@@ -1,8 +1,11 @@
 package websocket
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
+	"real-time-forum/database"
+	"real-time-forum/models"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -40,12 +43,12 @@ type Client struct {
 
 	// Buffered channel of outbound messages.
 	send chan []byte
+
+	// UserID associated with this client
+	UserID int64
 }
 
 // readPump pumps messages from the websocket connection to the hub.
-// The application runs readPump in a per-connection goroutine. The application
-// ensures that there is at most one reader on a connection by executing all
-// reads from this goroutine.
 func (c *Client) readPump() {
 	defer func() {
 		c.hub.unregister <- c
@@ -62,15 +65,44 @@ func (c *Client) readPump() {
 			}
 			break
 		}
-		// For now, simply broadcast everything received back to everyone
-		c.hub.broadcast <- message
+
+		// Parse the incoming JSON message
+		var wsMsg models.WSMessage
+		if err := json.Unmarshal(message, &wsMsg); err != nil {
+			log.Printf("error unmarshalling message: %v", err)
+			continue
+		}
+
+		// Enforce sender ID from the session (security)
+		wsMsg.SenderID = c.UserID
+
+		// Log logic: Store message if private
+		if wsMsg.Type == models.TypePrivateMessage {
+			// Save to DB
+			// We need to extract content from payload. Payload is interface{}.
+			// This part is tricky if Payload is map[string]interface{}.
+			// Let's assume Payload is just the string content for now or a struct.
+			// Let's assume it's string content for simplicity or check type.
+			if content, ok := wsMsg.Payload.(string); ok {
+				msg := &models.Message{
+					SenderID:    c.UserID,
+					RecipientID: wsMsg.RecipientID,
+					Content:     content,
+					CreatedAt:   time.Now(),
+				}
+				if err := database.CreateMessage(msg); err != nil {
+					log.Printf("Error saving message: %v", err)
+				}
+				// Optionally update timestamp in msg for the broadcast?
+				wsMsg.Payload = content // Ensure payload is set correctly
+			}
+		}
+
+		c.hub.broadcast <- &wsMsg
 	}
 }
 
 // writePump pumps messages from the hub to the websocket connection.
-// A goroutine running writePump is started for each connection. The
-// application ensures that there is at most one writer to a connection by
-// executing all writes from this goroutine.
 func (c *Client) writePump() {
 	ticker := time.NewTicker(pingPeriod)
 	defer func() {
@@ -82,7 +114,6 @@ func (c *Client) writePump() {
 		case message, ok := <-c.send:
 			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if !ok {
-				// The hub closed the channel.
 				c.conn.WriteMessage(websocket.CloseMessage, []byte{})
 				return
 			}
@@ -113,16 +144,33 @@ func (c *Client) writePump() {
 
 // ServeWs handles websocket requests from the peer.
 func ServeWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
+	// Authenticate user
+	cookie, err := r.Cookie("session_token")
+	if err != nil {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	session, err := database.GetSessionByToken(cookie.Value)
+	if err != nil || session == nil || session.ExpiresAt.Before(time.Now()) {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println(err)
 		return
 	}
-	client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256)}
+
+	client := &Client{
+		hub:    hub,
+		conn:   conn,
+		send:   make(chan []byte, 256),
+		UserID: session.UserID,
+	}
 	client.hub.register <- client
 
-	// Allow collection of memory referenced by the caller by doing all work in
-	// new goroutines.
 	go client.writePump()
 	go client.readPump()
 }
