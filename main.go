@@ -42,7 +42,11 @@ func main() {
 	http.HandleFunc("/api/register", handlers.RegisterHandler)
 	http.HandleFunc("/api/login", handlers.LoginHandler)
 	http.HandleFunc("/api/logout", handlers.LogoutHandler)
-	http.HandleFunc("/api/me", handlers.MeHandler)
+	http.HandleFunc("/api/me", middleware.AuthMiddleware(handlers.MeHandler)) // Assuming MeHandler exists from PR #1
+
+	// Chat Endpoints
+	http.HandleFunc("/api/chat/users", middleware.AuthMiddleware(handlers.GetChatUsersHandler))
+	http.HandleFunc("/api/chat/messages", middleware.AuthMiddleware(handlers.GetMessagesHandler))
 
 	// Posts Endpoints
 	http.HandleFunc("/api/posts", func(w http.ResponseWriter, r *http.Request) {
