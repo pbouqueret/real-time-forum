@@ -33,3 +33,6 @@ go.work.sum
 forum.db
 cookies.txt
 real-time-forum
+
+# Project docs (local only)
+*.docx
