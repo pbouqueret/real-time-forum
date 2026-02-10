@@ -17,7 +17,7 @@ A Single Page Application (SPA) forum built with Go and Vanilla JavaScript, feat
 - `websocket/`: WebSocket connection management
 - `models/`: Go structs representing database entities
 - `database/`: Database connection and SQL migrations
-- `middleware/`: HTTP middleware (auth, logging, etc.)
+- `middleware/`: HTTP middleware (auth, logging)
 - `utils/`: Common utility functions
 - `main.go`: Entry point for the server
 
@@ -27,6 +27,29 @@ A Single Page Application (SPA) forum built with Go and Vanilla JavaScript, feat
 - `js/`: Application logic
   - `pages/`: Page-specific logic (e.g., login, home, post view)
   - `utils/`: Helper functions
+
+## API Endpoints
+
+### Authentication
+- `POST /api/register` : Create a new account
+- `POST /api/login` : Login and create session
+- `POST /api/logout` : Logout and destroy session
+- `GET /api/me` : Get current user details
+
+### Chat (Sprint 3)
+- `GET /api/chat/users` : Get list of users sorted by last interaction
+- `GET /api/chat/messages?user_id={id}&limit={n}&offset={n}` : Get message history with a specific user
+
+## WebSocket Protocol
+
+Endpoint: `/ws`
+
+### Message Types
+- `private_message`: Send/Receive a private message.
+  - Payload: String content (when sending)
+- `user_online`: Notification that a user has connected.
+- `user_offline`: Notification that a user has disconnected.
+- `broadcast`: General broadcast (not used for chat).
 
 ## Instructions pour Lancer le Projet
 
