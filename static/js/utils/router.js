@@ -35,6 +35,8 @@ export async function handleRoute() {
         import('../pages/login.js').then(module => module.render(app));
     } else if (path === '/register') {
         import('../pages/register.js').then(module => module.render(app));
+    } else if (path === '/chat') {
+        import('../pages/chat.js').then(module => module.render(app));
     } else if (path.startsWith('/post/')) {
         const postId = path.split('/')[2];
         import('../pages/post.js').then(module => module.render(app, postId));
