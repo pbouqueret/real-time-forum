@@ -1,3 +1,5 @@
+import { connect, disconnect } from './websocket.js';
+
 // App State - Single source of truth for the SPA
 export const state = {
     currentUser: null,
@@ -10,8 +12,11 @@ export async function checkAuth() {
         const response = await fetch('/api/me');
         if (response.ok) {
             const user = await response.json();
+            const wasAuthenticated = state.isAuthenticated;
             state.currentUser = user;
             state.isAuthenticated = true;
+            // Connect WS on first auth
+            if (!wasAuthenticated) connect();
             return true;
         }
     } catch (e) {
@@ -26,6 +31,7 @@ export async function checkAuth() {
 export function setUser(user) {
     state.currentUser = user;
     state.isAuthenticated = true;
+    connect();
     updateNavbar();
 }
 
@@ -33,6 +39,7 @@ export function setUser(user) {
 export function clearUser() {
     state.currentUser = null;
     state.isAuthenticated = false;
+    disconnect();
     updateNavbar();
 }
 
@@ -52,11 +59,14 @@ export function updateNavbar() {
     const nav = document.getElementById('navbar');
     if (!nav) return;
 
+    const currentPath = window.location.hash.slice(1) || '/';
+
     if (state.isAuthenticated && state.currentUser) {
         nav.innerHTML = `
             <a href="#/" class="nav-brand">Real-Time Forum</a>
             <div class="nav-right">
-                <a href="#/chat" class="nav-link">Chat</a>
+                <a href="#/" class="nav-link ${currentPath === '/' ? 'active' : ''}">Forum</a>
+                <a href="#/chat" class="nav-link ${currentPath === '/chat' ? 'active' : ''}">Chat</a>
                 <span class="nav-user">${state.currentUser.username}</span>
                 <button id="logoutBtn" class="btn-logout">Logout</button>
             </div>
@@ -66,8 +76,8 @@ export function updateNavbar() {
         nav.innerHTML = `
             <a href="#/" class="nav-brand">Real-Time Forum</a>
             <div class="nav-right">
-                <a href="#/login" class="nav-link">Login</a>
-                <a href="#/register" class="nav-link">Register</a>
+                <a href="#/login" class="nav-link ${currentPath === '/login' ? 'active' : ''}">Login</a>
+                <a href="#/register" class="nav-link ${currentPath === '/register' ? 'active' : ''}">Register</a>
             </div>
         `;
     }

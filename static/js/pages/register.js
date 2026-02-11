@@ -1,4 +1,5 @@
 import { navigate } from '../utils/router.js';
+import { success as showSuccess, error as showError } from '../utils/toast.js';
 
 export function render(container) {
     container.innerHTML = `
@@ -61,13 +62,14 @@ export function render(container) {
             });
 
             if (response.ok) {
+                showSuccess('Account created! Please login.');
                 navigate('/login');
             } else {
                 const text = await response.text();
                 errorDiv.textContent = text || 'Registration failed';
             }
-        } catch (error) {
-            errorDiv.textContent = 'An error occurred. Please try again.';
+        } catch (err) {
+            showError('Network error. Please try again.');
         } finally {
             submitBtn.disabled = false;
             submitBtn.textContent = 'Register';
