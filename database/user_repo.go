@@ -7,13 +7,13 @@ import (
 
 // CreateUser inserts a new user into the database
 func CreateUser(user *models.User) error {
-	stmt, err := DB.Prepare("INSERT INTO users(uuid, username, email, password_hash) VALUES(?, ?, ?, ?)")
+	stmt, err := DB.Prepare("INSERT INTO users(uuid, username, email, password_hash, age, gender, first_name, last_name) VALUES(?, ?, ?, ?, ?, ?, ?, ?)")
 	if err != nil {
 		return err
 	}
 	defer stmt.Close()
 
-	res, err := stmt.Exec(user.UUID, user.Username, user.Email, user.PasswordHash)
+	res, err := stmt.Exec(user.UUID, user.Username, user.Email, user.PasswordHash, user.Age, user.Gender, user.FirstName, user.LastName)
 	if err != nil {
 		return err
 	}
