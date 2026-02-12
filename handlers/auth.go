@@ -14,9 +14,13 @@ import (
 
 // RegisterRequest payload
 type RegisterRequest struct {
-	Username string `json:"username"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Username  string `json:"username"`
+	Email     string `json:"email"`
+	Password  string `json:"password"`
+	Age       int    `json:"age"`
+	Gender    string `json:"gender"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
 }
 
 // LoginRequest payload
@@ -39,14 +43,22 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Basic validation
-	if req.Username == "" || req.Email == "" || req.Password == "" {
+	if req.Username == "" || req.Email == "" || req.Password == "" || req.FirstName == "" || req.LastName == "" || req.Gender == "" {
 		http.Error(w, "All fields are required", http.StatusBadRequest)
+		return
+	}
+
+	if req.Age <= 0 {
+		http.Error(w, "Invalid age", http.StatusBadRequest)
 		return
 	}
 
 	// Sanitize inputs
 	req.Username = html.EscapeString(req.Username)
 	req.Email = html.EscapeString(req.Email)
+	req.FirstName = html.EscapeString(req.FirstName)
+	req.LastName = html.EscapeString(req.LastName)
+	req.Gender = html.EscapeString(req.Gender)
 
 	// Check if user exists
 	existingUser, _ := database.GetUserByEmail(req.Email)
@@ -75,6 +87,10 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		Username:     req.Username,
 		Email:        req.Email,
 		PasswordHash: hashedPassword,
+		Age:          req.Age,
+		Gender:       req.Gender,
+		FirstName:    req.FirstName,
+		LastName:     req.LastName,
 	}
 
 	if err := database.CreateUser(user); err != nil {
