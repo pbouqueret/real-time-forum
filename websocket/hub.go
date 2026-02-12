@@ -3,7 +3,9 @@ package websocket
 import (
 	"encoding/json"
 	"log"
+	"real-time-forum/database"
 	"real-time-forum/models"
+	"time"
 )
 
 // Hub maintains the set of active clients and broadcasts messages.
@@ -105,10 +107,13 @@ func (h *Hub) sendToClients(clients map[*Client]bool, message *models.WSMessage)
 }
 
 func (h *Hub) broadcastPresence(userID int64, online bool) {
-	// We need username here. For now let's just send ID or doing a quick DB lookup?
-	// Ideally Client struct has Username too.
-	// We will implement a quick lookup or assume ID is enough for frontend to fetch details?
-	// Let's send a specific message type.
+	// Look up the user to get the nickname
+	user, err := database.GetUserByID(userID)
+	if err != nil {
+		log.Printf("Error getting user for presence broadcast: %v", err)
+		return
+	}
+
 	msg := &models.WSMessage{
 		Type: func() models.WSMessageType {
 			if online {
@@ -117,9 +122,11 @@ func (h *Hub) broadcastPresence(userID int64, online bool) {
 			return models.TypeUserOffline
 		}(),
 		Payload: models.UserStatusPayload{
-			UserID: userID,
-			Online: online,
+			UserID:   userID,
+			Nickname: user.Username,
+			Online:   online,
 		},
+		CreatedAt: time.Now().Format(time.RFC3339),
 	}
 	// Send to all
 	for _, clients := range h.clients {
