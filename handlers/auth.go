@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"html"
 	"net/http"
 	"real-time-forum/database"
 	"real-time-forum/models"
@@ -42,6 +43,10 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "All fields are required", http.StatusBadRequest)
 		return
 	}
+
+	// Sanitize inputs
+	req.Username = html.EscapeString(req.Username)
+	req.Email = html.EscapeString(req.Email)
 
 	// Check if user exists
 	existingUser, _ := database.GetUserByEmail(req.Email)
@@ -110,6 +115,14 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Single Session Enforcement: Invalidate previous sessions
+	if err := database.DeleteSessionsByUserID(user.ID); err != nil {
+		// Log error but proceed? Or fail? Proceeding is safer to avoid lockout if DB glitch?
+		// But let's fail to ensure security policy.
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
 	// Create session
 	sessionToken, _ := uuid.NewV4()
 	expiresAt := time.Now().Add(24 * time.Hour)
@@ -130,6 +143,8 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		Value:    sessionToken.String(),
 		Expires:  expiresAt,
 		HttpOnly: true,
+		Secure:   false, // Set to true in production
+		SameSite: http.SameSiteLaxMode,
 		Path:     "/",
 	})
 
@@ -181,6 +196,8 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 		Value:    "",
 		Expires:  time.Now().Add(-1 * time.Hour),
 		HttpOnly: true,
+		Secure:   false,
+		SameSite: http.SameSiteLaxMode,
 		Path:     "/",
 	})
 
