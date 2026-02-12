@@ -16,11 +16,12 @@ type WSMessage struct {
 	Payload     interface{}   `json:"payload,omitempty"`
 	RecipientID int64         `json:"recipient_id,omitempty"` // For private messages
 	SenderID    int64         `json:"sender_id,omitempty"`
+	CreatedAt   string        `json:"created_at,omitempty"`
 }
 
 // UserStatusPayload is sent when a user goes online/offline
 type UserStatusPayload struct {
 	UserID   int64  `json:"user_id"`
-	Username string `json:"username"`
+	Nickname string `json:"nickname"`
 	Online   bool   `json:"online"`
 }

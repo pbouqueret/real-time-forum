@@ -84,16 +84,18 @@ func (c *Client) readPump() {
 			// Let's assume Payload is just the string content for now or a struct.
 			// Let's assume it's string content for simplicity or check type.
 			if content, ok := wsMsg.Payload.(string); ok {
+				now := time.Now()
 				msg := &models.Message{
 					SenderID:    c.UserID,
 					RecipientID: wsMsg.RecipientID,
 					Content:     content,
-					CreatedAt:   time.Now(),
+					CreatedAt:   now,
 				}
 				if err := database.CreateMessage(msg); err != nil {
 					log.Printf("Error saving message: %v", err)
 				}
-				// Optionally update timestamp in msg for the broadcast?
+				// Update timestamp in msg for the broadcast
+				wsMsg.CreatedAt = now.Format(time.RFC3339)
 				wsMsg.Payload = content // Ensure payload is set correctly
 			}
 		}
