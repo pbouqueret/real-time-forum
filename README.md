@@ -30,14 +30,26 @@ A Single Page Application (SPA) forum built with Go and Vanilla JavaScript, feat
 
 ## API Endpoints
 
-### Authentication
+### Authentication (`handlers/auth.go`)
 - `POST /api/register` : Create a new account
+  - Body: `{ "username": "...", "email": "...", "password": "..." }`
 - `POST /api/login` : Login and create session
+  - Body: `{ "identifier": "...", "password": "..." }`
 - `POST /api/logout` : Logout and destroy session
 - `GET /api/me` : Get current user details
 
-### Chat (Sprint 3)
-- `GET /api/chat/users` : Get list of users sorted by last interaction
+### Posts & Comments (`handlers/posts.go`, `handlers/comments.go`)
+- `GET /api/posts?category=...` : List posts (optional category filter)
+- `POST /api/posts` : Create a post
+  - Body: `{ "title": "...", "content": "...", "category": "..." }`
+- `GET /api/posts/{id}` : Get post details
+- `GET /api/posts/{id}/comments` : Get comments for a post
+- `POST /api/posts/{id}/comments` : Add a comment
+  - Body: `{ "content": "..." }`
+- `GET /api/categories` : Get all categories
+
+### Chat (`handlers/chat.go`)
+- `GET /api/chat/users` : Get list of users sorted by last interaction (online status via WS)
 - `GET /api/chat/messages?user_id={id}&limit={n}&offset={n}` : Get message history with a specific user
 
 ## WebSocket Protocol

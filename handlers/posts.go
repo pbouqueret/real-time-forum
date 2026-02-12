@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"html"
 	"net/http"
 	"real-time-forum/database"
 	"real-time-forum/middleware"
@@ -63,9 +64,9 @@ func createPost(w http.ResponseWriter, r *http.Request) {
 
 	post := &models.Post{
 		UserID:   userID,
-		Title:    strings.TrimSpace(req.Title),
-		Content:  strings.TrimSpace(req.Content),
-		Category: strings.TrimSpace(req.Category),
+		Title:    html.EscapeString(strings.TrimSpace(req.Title)),
+		Content:  html.EscapeString(strings.TrimSpace(req.Content)),
+		Category: html.EscapeString(strings.TrimSpace(req.Category)),
 	}
 
 	if err := database.CreatePost(post); err != nil {

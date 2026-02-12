@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"html"
 	"net/http"
 	"real-time-forum/database"
 	"real-time-forum/middleware"
@@ -84,7 +85,7 @@ func createComment(w http.ResponseWriter, r *http.Request, postID int64) {
 	comment := &models.Comment{
 		UserID:  userID,
 		PostID:  postID,
-		Content: strings.TrimSpace(req.Content),
+		Content: html.EscapeString(strings.TrimSpace(req.Content)),
 	}
 
 	if err := database.CreateComment(comment); err != nil {

@@ -55,3 +55,15 @@ func CleanupSessions() error {
 	_, err := DB.Exec("DELETE FROM sessions WHERE expires_at < ?", time.Now())
 	return err
 }
+
+// DeleteSessionsByUserID removes all sessions for a specific user (Single Session Enforcement)
+func DeleteSessionsByUserID(userID int64) error {
+	stmt, err := DB.Prepare("DELETE FROM sessions WHERE user_id = ?")
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(userID)
+	return err
+}
