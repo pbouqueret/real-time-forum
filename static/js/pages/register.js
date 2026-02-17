@@ -7,8 +7,33 @@ export function render(container) {
             <h2>Register</h2>
             <form id="registerForm" class="auth-form">
                 <div class="form-group">
-                    <label for="username">Username</label>
-                    <input type="text" id="username" name="username" placeholder="Choose a username" required minlength="3">
+                    <label for="username">Nickname</label>
+                    <input type="text" id="username" name="username" placeholder="Choose a nickname" required minlength="3">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="firstName">First Name</label>
+                        <input type="text" id="firstName" name="firstName" placeholder="First name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="lastName">Last Name</label>
+                        <input type="text" id="lastName" name="lastName" placeholder="Last name" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="age">Age</label>
+                        <input type="number" id="age" name="age" placeholder="Age" required min="1" max="150">
+                    </div>
+                    <div class="form-group">
+                        <label for="gender">Gender</label>
+                        <select id="gender" name="gender" required>
+                            <option value="">Select</option>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label for="email">Email</label>
@@ -32,6 +57,10 @@ export function render(container) {
     document.getElementById('registerForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const username = document.getElementById('username').value.trim();
+        const firstName = document.getElementById('firstName').value.trim();
+        const lastName = document.getElementById('lastName').value.trim();
+        const age = parseInt(document.getElementById('age').value, 10);
+        const gender = document.getElementById('gender').value;
         const email = document.getElementById('email').value.trim();
         const password = document.getElementById('password').value;
         const confirmPassword = document.getElementById('confirmPassword').value;
@@ -51,6 +80,16 @@ export function render(container) {
             return;
         }
 
+        if (!gender) {
+            errorDiv.textContent = 'Please select a gender';
+            return;
+        }
+
+        if (isNaN(age) || age <= 0) {
+            errorDiv.textContent = 'Please enter a valid age';
+            return;
+        }
+
         submitBtn.disabled = true;
         submitBtn.textContent = 'Registering...';
 
@@ -58,7 +97,15 @@ export function render(container) {
             const response = await fetch('/api/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, email, password }),
+                body: JSON.stringify({
+                    username,
+                    first_name: firstName,
+                    last_name: lastName,
+                    age,
+                    gender,
+                    email,
+                    password,
+                }),
             });
 
             if (response.ok) {

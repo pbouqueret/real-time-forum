@@ -13,9 +13,13 @@ import (
 
 // RegisterRequest payload
 type RegisterRequest struct {
-	Username string `json:"username"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Username  string `json:"username"`
+	Age       int    `json:"age"`
+	Gender    string `json:"gender"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	Email     string `json:"email"`
+	Password  string `json:"password"`
 }
 
 // LoginRequest payload
@@ -38,7 +42,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Basic validation
-	if req.Username == "" || req.Email == "" || req.Password == "" {
+	if req.Username == "" || req.Email == "" || req.Password == "" || req.FirstName == "" || req.LastName == "" || req.Gender == "" || req.Age <= 0 {
 		http.Error(w, "All fields are required", http.StatusBadRequest)
 		return
 	}
@@ -68,6 +72,10 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	user := &models.User{
 		UUID:         userUUID.String(),
 		Username:     req.Username,
+		Age:          req.Age,
+		Gender:       req.Gender,
+		FirstName:    req.FirstName,
+		LastName:     req.LastName,
 		Email:        req.Email,
 		PasswordHash: hashedPassword,
 	}
