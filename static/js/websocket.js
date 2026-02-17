@@ -20,6 +20,19 @@ function dispatch(message) {
     if (callbacks) {
         callbacks.forEach(cb => cb(message));
     }
+    // Also dispatch to global listeners for online/offline events
+    if (message.type === 'user_online') {
+        const globalCallbacks = listeners['global_user_online'];
+        if (globalCallbacks) {
+            globalCallbacks.forEach(cb => cb(message));
+        }
+    }
+    if (message.type === 'user_offline') {
+        const globalCallbacks = listeners['global_user_offline'];
+        if (globalCallbacks) {
+            globalCallbacks.forEach(cb => cb(message));
+        }
+    }
 }
 
 // Connect to WebSocket

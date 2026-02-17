@@ -24,13 +24,17 @@ func main() {
 
 	// Create 3 test users
 	users := []struct {
-		Username string
-		Email    string
-		Password string
+		Username  string
+		FirstName string
+		LastName  string
+		Age       int
+		Gender    string
+		Email     string
+		Password  string
 	}{
-		{"alice", "alice@demo.com", "password123"},
-		{"bob", "bob@demo.com", "password123"},
-		{"charlie", "charlie@demo.com", "password123"},
+		{"alice", "Alice", "Smith", 25, "female", "alice@demo.com", "password123"},
+		{"bob", "Bob", "Jones", 28, "male", "bob@demo.com", "password123"},
+		{"charlie", "Charlie", "Brown", 22, "male", "charlie@demo.com", "password123"},
 	}
 
 	var userIDs []int64
@@ -41,6 +45,10 @@ func main() {
 		user := &models.User{
 			UUID:         uid.String(),
 			Username:     u.Username,
+			Age:          u.Age,
+			Gender:       u.Gender,
+			FirstName:    u.FirstName,
+			LastName:     u.LastName,
 			Email:        u.Email,
 			PasswordHash: hash,
 		}

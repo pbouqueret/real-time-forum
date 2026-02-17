@@ -76,13 +76,14 @@ func (c *Client) readPump() {
 		// Enforce sender ID from the session (security)
 		wsMsg.SenderID = c.UserID
 
+		// Look up sender username
+		senderUser, err := database.GetUserByID(c.UserID)
+		if err == nil && senderUser != nil {
+			wsMsg.SenderUsername = senderUser.Username
+		}
+
 		// Log logic: Store message if private
 		if wsMsg.Type == models.TypePrivateMessage {
-			// Save to DB
-			// We need to extract content from payload. Payload is interface{}.
-			// This part is tricky if Payload is map[string]interface{}.
-			// Let's assume Payload is just the string content for now or a struct.
-			// Let's assume it's string content for simplicity or check type.
 			if content, ok := wsMsg.Payload.(string); ok {
 				now := time.Now()
 				msg := &models.Message{

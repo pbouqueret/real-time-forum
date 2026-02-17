@@ -85,12 +85,12 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	user := &models.User{
 		UUID:         userUUID.String(),
 		Username:     req.Username,
-		Email:        req.Email,
-		PasswordHash: hashedPassword,
 		Age:          req.Age,
 		Gender:       req.Gender,
 		FirstName:    req.FirstName,
 		LastName:     req.LastName,
+		Email:        req.Email,
+		PasswordHash: hashedPassword,
 	}
 
 	if err := database.CreateUser(user); err != nil {

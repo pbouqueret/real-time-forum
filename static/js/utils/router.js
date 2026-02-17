@@ -1,4 +1,4 @@
-import { state, checkAuth, updateNavbar } from '../app.js';
+import { state, checkAuth, updateNavbar, updateSidebar } from '../app.js';
 
 export function navigate(path) {
     window.location.hash = path;
@@ -7,13 +7,22 @@ export function navigate(path) {
 // Pages that don't require authentication
 const publicRoutes = ['/login', '/register'];
 
+let currentCleanup = null;
+
 export async function handleRoute() {
     const path = window.location.hash.slice(1) || '/';
     const app = document.getElementById('app');
 
+    // Cleanup previous page if needed
+    if (currentCleanup) {
+        currentCleanup();
+        currentCleanup = null;
+    }
+
     // Check auth on every route change
     await checkAuth();
     updateNavbar();
+    updateSidebar();
 
     // Route guard: redirect to login if not authenticated and route is protected
     const isPublic = publicRoutes.includes(path) || publicRoutes.some(r => path.startsWith(r));
@@ -36,7 +45,10 @@ export async function handleRoute() {
     } else if (path === '/register') {
         import('../pages/register.js').then(module => module.render(app));
     } else if (path === '/chat') {
-        import('../pages/chat.js').then(module => module.render(app));
+        import('../pages/chat.js').then(module => {
+            module.render(app);
+            currentCleanup = module.cleanup;
+        });
     } else if (path.startsWith('/post/')) {
         const postId = path.split('/')[2];
         import('../pages/post.js').then(module => module.render(app, postId));

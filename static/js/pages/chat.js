@@ -183,8 +183,10 @@ async function loadMessages(initial = false) {
 function renderMessage(msg) {
     const isMine = msg.sender_id === state.currentUser.id;
     const time = formatTime(msg.created_at);
+    const senderName = msg.sender_username || (isMine ? state.currentUser.username : selectedUsername);
     return `
         <div class="chat-bubble ${isMine ? 'mine' : 'theirs'}">
+            <span class="bubble-sender">${escapeHtml(senderName)}</span>
             <p class="bubble-content">${escapeHtml(msg.content)}</p>
             <span class="bubble-time">${time}</span>
         </div>
@@ -209,6 +211,7 @@ function handleSendMessage(e) {
 
         messagesDiv.insertAdjacentHTML('beforeend', `
             <div class="chat-bubble mine">
+                <span class="bubble-sender">${escapeHtml(state.currentUser.username)}</span>
                 <p class="bubble-content">${escapeHtml(content)}</p>
                 <span class="bubble-time">${formatTime(new Date().toISOString())}</span>
             </div>
@@ -235,8 +238,10 @@ function handleIncomingMessage(wsMsg) {
             const emptyState = messagesDiv.querySelector('.empty-state');
             if (emptyState) emptyState.remove();
 
+            const senderName = wsMsg.sender_username || selectedUsername;
             messagesDiv.insertAdjacentHTML('beforeend', `
                 <div class="chat-bubble theirs">
+                    <span class="bubble-sender">${escapeHtml(senderName)}</span>
                     <p class="bubble-content">${escapeHtml(content)}</p>
                     <span class="bubble-time">${formatTime(new Date().toISOString())}</span>
                 </div>

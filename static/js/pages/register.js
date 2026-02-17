@@ -19,21 +19,21 @@ export function render(container) {
                 <div class="form-row">
                     <div class="form-group">
                         <label for="age">Age</label>
-                        <input type="number" id="age" name="age" placeholder="Age" required min="18">
+                        <input type="number" id="age" name="age" placeholder="Age" required min="1" max="150">
                     </div>
                     <div class="form-group">
                         <label for="gender">Gender</label>
                         <select id="gender" name="gender" required>
                             <option value="">Select Gender</option>
-                            <option value="Male">Male</option>
-                            <option value="Female">Female</option>
-                            <option value="Other">Other</option>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                            <option value="other">Other</option>
                         </select>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label for="username">Username</label>
-                    <input type="text" id="username" name="username" placeholder="Choose a username" required minlength="3">
+                    <label for="username">Nickname</label>
+                    <input type="text" id="username" name="username" placeholder="Choose a nickname" required minlength="3">
                 </div>
                 <div class="form-group">
                     <label for="email">Email</label>
@@ -56,20 +56,22 @@ export function render(container) {
 
     document.getElementById('registerForm').addEventListener('submit', async (e) => {
         e.preventDefault();
+        
         const username = document.getElementById('username').value.trim();
-        const email = document.getElementById('email').value.trim();
         const firstName = document.getElementById('firstName').value.trim();
         const lastName = document.getElementById('lastName').value.trim();
-        const age = parseInt(document.getElementById('age').value);
+        const age = parseInt(document.getElementById('age').value, 10);
         const gender = document.getElementById('gender').value;
+        const email = document.getElementById('email').value.trim();
         const password = document.getElementById('password').value;
         const confirmPassword = document.getElementById('confirmPassword').value;
+        
         const errorDiv = document.getElementById('error-message');
         const submitBtn = e.target.querySelector('button[type="submit"]');
 
         errorDiv.textContent = '';
 
-        // Client-side validation
+        // Validation côté client
         if (password !== confirmPassword) {
             errorDiv.textContent = 'Passwords do not match';
             return;
@@ -77,6 +79,16 @@ export function render(container) {
 
         if (password.length < 6) {
             errorDiv.textContent = 'Password must be at least 6 characters';
+            return;
+        }
+
+        if (!gender) {
+            errorDiv.textContent = 'Please select a gender';
+            return;
+        }
+
+        if (isNaN(age) || age <= 0) {
+            errorDiv.textContent = 'Please enter a valid age';
             return;
         }
 

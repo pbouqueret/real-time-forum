@@ -12,11 +12,12 @@ const (
 
 // WSMessage represents the structure of messages sent over WebSocket
 type WSMessage struct {
-	Type        WSMessageType `json:"type"`
-	Payload     interface{}   `json:"payload,omitempty"`
-	RecipientID int64         `json:"recipient_id,omitempty"` // For private messages
-	SenderID    int64         `json:"sender_id,omitempty"`
-	CreatedAt   string        `json:"created_at,omitempty"`
+	Type           WSMessageType `json:"type"`
+	Payload        interface{}   `json:"payload,omitempty"`
+	RecipientID    int64         `json:"recipient_id,omitempty"` // For private messages
+	SenderID       int64         `json:"sender_id,omitempty"`
+	SenderUsername string        `json:"sender_username,omitempty"`
+	CreatedAt      string        `json:"created_at,omitempty"`
 }
 
 // UserStatusPayload is sent when a user goes online/offline
