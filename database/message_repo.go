@@ -59,14 +59,17 @@ func GetChatUsers(currentUserID int64) ([]*models.User, error) {
 	// Logic:
 	// 1. Get all users except current one.
 	// 2. Join with messages to find the latest message date for each user (sent or received).
-	// 3. Order by that date DESC, then username ASC.
+	// 3. Order by that date DESC (NULLs last), then username ASC.
 	query := `
 		SELECT u.id, u.uuid, u.username, u.age, u.gender, u.first_name, u.last_name, u.email, u.created_at, MAX(m.created_at) as last_msg_time
 		FROM users u
 		LEFT JOIN messages m ON (u.id = m.sender_id AND m.recipient_id = ?) OR (u.id = m.recipient_id AND m.sender_id = ?)
 		WHERE u.id != ?
 		GROUP BY u.id
-		ORDER BY last_msg_time DESC, u.username ASC
+		ORDER BY 
+			CASE WHEN last_msg_time IS NULL THEN 1 ELSE 0 END ASC, -- Non-nulls first
+			last_msg_time DESC, 
+			u.username ASC
 	`
 	rows, err := DB.Query(query, currentUserID, currentUserID, currentUserID)
 	if err != nil {
@@ -78,10 +81,14 @@ func GetChatUsers(currentUserID int64) ([]*models.User, error) {
 	for rows.Next() {
 		user := &models.User{}
 		var lastMsgTime sql.NullTime
-		if err := rows.Scan(&user.ID, &user.UUID, &user.Username, &user.Age, &user.Gender, &user.FirstName, &user.LastName, &user.Email, &user.CreatedAt, &lastMsgTime); err != nil {
+
+		// Map the columns. Note: we are not fetching password_hash or new fields (age, gender, etc) here for the list
+		// but Scan must match the SELECT columns order.
+		// SELECT: id, uuid, username, email, created_at, last_msg_time
+		if err := rows.Scan(&user.ID, &user.UUID, &user.Username, &user.Email, &user.CreatedAt, &lastMsgTime); err != nil {
 			return nil, err
 		}
 		users = append(users, user)
 	}
 	return users, nil
-}
+} 

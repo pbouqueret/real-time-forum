@@ -6,18 +6,14 @@ export function render(container) {
         <div class="auth-container">
             <h2>Register</h2>
             <form id="registerForm" class="auth-form">
-                <div class="form-group">
-                    <label for="username">Nickname</label>
-                    <input type="text" id="username" name="username" placeholder="Choose a nickname" required minlength="3">
-                </div>
                 <div class="form-row">
                     <div class="form-group">
                         <label for="firstName">First Name</label>
-                        <input type="text" id="firstName" name="firstName" placeholder="First name" required>
+                        <input type="text" id="firstName" name="firstName" placeholder="First Name" required>
                     </div>
                     <div class="form-group">
                         <label for="lastName">Last Name</label>
-                        <input type="text" id="lastName" name="lastName" placeholder="Last name" required>
+                        <input type="text" id="lastName" name="lastName" placeholder="Last Name" required>
                     </div>
                 </div>
                 <div class="form-row">
@@ -28,12 +24,16 @@ export function render(container) {
                     <div class="form-group">
                         <label for="gender">Gender</label>
                         <select id="gender" name="gender" required>
-                            <option value="">Select</option>
+                            <option value="">Select Gender</option>
                             <option value="male">Male</option>
                             <option value="female">Female</option>
                             <option value="other">Other</option>
                         </select>
                     </div>
+                </div>
+                <div class="form-group">
+                    <label for="username">Nickname</label>
+                    <input type="text" id="username" name="username" placeholder="Choose a nickname" required minlength="3">
                 </div>
                 <div class="form-group">
                     <label for="email">Email</label>
@@ -56,6 +56,7 @@ export function render(container) {
 
     document.getElementById('registerForm').addEventListener('submit', async (e) => {
         e.preventDefault();
+        
         const username = document.getElementById('username').value.trim();
         const firstName = document.getElementById('firstName').value.trim();
         const lastName = document.getElementById('lastName').value.trim();
@@ -64,12 +65,13 @@ export function render(container) {
         const email = document.getElementById('email').value.trim();
         const password = document.getElementById('password').value;
         const confirmPassword = document.getElementById('confirmPassword').value;
+        
         const errorDiv = document.getElementById('error-message');
         const submitBtn = e.target.querySelector('button[type="submit"]');
 
         errorDiv.textContent = '';
 
-        // Client-side validation
+        // Validation côté client
         if (password !== confirmPassword) {
             errorDiv.textContent = 'Passwords do not match';
             return;
@@ -99,12 +101,12 @@ export function render(container) {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     username,
+                    email,
+                    password,
                     first_name: firstName,
                     last_name: lastName,
                     age,
-                    gender,
-                    email,
-                    password,
+                    gender
                 }),
             });
 
